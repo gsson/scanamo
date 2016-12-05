@@ -63,17 +63,21 @@ object ScanamoFree {
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
     ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.asAVMap, None))
 
-  def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    ScanResultStream.stream[T](new ScanRequest().withTableName(tableName))
+  def scan[T: DynamoFormat](tableName: String)
+    (implicit requestModifier: ScanItems.Modifier = nullModifier): ScanamoOps[List[Either[DynamoReadError, T]]] =
+    ScanResultStream.stream[T](requestModifier(new ScanRequest().withTableName(tableName)))
 
-  def scanWithLimit[T: DynamoFormat](tableName: String, limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    ScanResultStream.stream[T](new ScanRequest().withTableName(tableName).withLimit(limit))
+  def scanWithLimit[T: DynamoFormat](tableName: String, limit: Int)
+    (implicit requestModifier: ScanItems.Modifier = nullModifier): ScanamoOps[List[Either[DynamoReadError, T]]] =
+    ScanResultStream.stream[T](requestModifier(new ScanRequest().withTableName(tableName).withLimit(limit)))
 
-  def scanIndex[T: DynamoFormat](tableName: String, indexName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    ScanResultStream.stream[T](new ScanRequest().withTableName(tableName).withIndexName(indexName))
+  def scanIndex[T: DynamoFormat](tableName: String, indexName: String)
+    (implicit requestModifier: ScanItems.Modifier = nullModifier): ScanamoOps[List[Either[DynamoReadError, T]]] =
+    ScanResultStream.stream[T](requestModifier(new ScanRequest().withTableName(tableName).withIndexName(indexName)))
 
-  def scanIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String, limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    ScanResultStream.stream[T](new ScanRequest().withTableName(tableName).withIndexName(indexName).withLimit(limit))
+  def scanIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String, limit: Int)
+    (implicit requestModifier: ScanItems.Modifier = nullModifier): ScanamoOps[List[Either[DynamoReadError, T]]] =
+    ScanResultStream.stream[T](requestModifier(new ScanRequest().withTableName(tableName).withIndexName(indexName).withLimit(limit)))
 
   def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
     QueryResultStream.stream[T](query(new QueryRequest().withTableName(tableName)))

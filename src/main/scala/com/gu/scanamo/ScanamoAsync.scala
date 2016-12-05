@@ -52,19 +52,23 @@ object ScanamoAsync {
     exec(client)(ScanamoFree.update[V, U](tableName)(key)(expression))
 
   def scan[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)
-    (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext, requestModifier: ScanItems.Modifier = nullModifier)
+    : Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scan(tableName))
 
   def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, limit: Int)
-    (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext, requestModifier: ScanItems.Modifier = nullModifier)
+    : Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
 
   def scanIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)
-    (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext, requestModifier: ScanItems.Modifier = nullModifier)
+    : Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
   def scanIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String, limit: Int)
-    (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext, requestModifier: ScanItems.Modifier = nullModifier)
+    : Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
   def query[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_])
