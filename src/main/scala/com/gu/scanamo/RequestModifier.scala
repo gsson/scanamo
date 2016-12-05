@@ -4,6 +4,8 @@ import com.amazonaws.services.dynamodbv2.model.GetItemRequest
 
 trait RequestModifier[T] {
   def apply(t: T): T
+  def compose(g: RequestModifier[T]): RequestModifier[T] = x => apply(g(x))
+  def andThen(g: RequestModifier[T]): RequestModifier[T] = x => g(apply(x))
 }
 
 object RequestModifier {
