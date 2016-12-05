@@ -13,6 +13,7 @@ import com.gu.scanamo.update.UpdateExpression
   * To avoid blocking, use [[com.gu.scanamo.ScanamoAsync]]
   */
 object Scanamo {
+  import RequestModifier.nullModifier
 
   def exec[A](client: AmazonDynamoDB)(op: ScanamoOps[A]): A = op.foldMap(ScanamoInterpreters.id(client))
 
@@ -91,6 +92,7 @@ object Scanamo {
     * }}}
     */
   def get[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
+                          (implicit requestModifier: GetItem.Modifier = nullModifier)
     : Option[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.get[T](tableName)(key))
 

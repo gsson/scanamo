@@ -5,7 +5,7 @@ import java.util
 import cats._
 import cats.data.State
 import cats.implicits._
-import com.amazonaws.services.dynamodbv2.model.{AttributeValue, QueryResult, ScanResult}
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, GetItemRequest, QueryResult, ScanResult}
 import com.gu.scanamo.ops.{BatchGet, BatchWrite, Query, _}
 import org.scalatest.{FunSuite, Matchers}
 
@@ -30,6 +30,22 @@ class ScanamoFreeTest extends FunSuite with Matchers {
     val numOps = limitedScan.foldMap(countingInterpreter).runEmptyS.value
 
     assert(numOps == 42)
+  }
+
+  test("applies request modifier") {
+    import com.gu.scanamo.syntax._
+
+    var executed = 0
+    implicit val getItemRequestModifier = new RequestModifier[GetItemRequest] {
+      override def apply(t: GetItemRequest): GetItemRequest = {
+        executed = executed + 1
+        t
+      }
+    }
+
+    ScanamoFree.get[Int]("x")('id -> 42)
+
+    assert(executed == 1)
   }
 }
 

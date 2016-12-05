@@ -17,6 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 object ScanamoAsync {
   import cats.instances.future._
+  import RequestModifier.nullModifier
 
   def exec[A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A])(implicit ec: ExecutionContext) =
     op.foldMap(ScanamoInterpreters.future(client)(ec))
@@ -30,7 +31,7 @@ object ScanamoAsync {
     exec(client)(ScanamoFree.putAll(tableName)(items))
 
   def get[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])
-    (implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext, requestModifier: GetItem.Modifier = nullModifier): Future[Option[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.get[T](tableName)(key))
 
   def getAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(keys: UniqueKeys[_])

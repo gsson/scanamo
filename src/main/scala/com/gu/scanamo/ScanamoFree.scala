@@ -13,6 +13,7 @@ object ScanamoFree {
   import cats.instances.list._
   import cats.syntax.traverse._
   import collection.JavaConverters._
+  import RequestModifier.nullModifier
 
   private val batchSize = 25
 
@@ -42,9 +43,9 @@ object ScanamoFree {
   }
 
   def get[T](tableName: String)(key: UniqueKey[_])
-    (implicit ft: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+    (implicit ft: DynamoFormat[T], requestModifier: GetItem.Modifier = nullModifier): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     for {
-      res <- ScanamoOps.get(new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava))
+      res <- ScanamoOps.get(requestModifier(new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava)))
     } yield
       Option(res.getItem).map(read[T])
 

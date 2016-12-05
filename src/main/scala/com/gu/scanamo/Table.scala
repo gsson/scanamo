@@ -1,5 +1,6 @@
 package com.gu.scanamo
 
+import com.amazonaws.services.dynamodbv2.model.GetItemRequest
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
@@ -30,10 +31,11 @@ import com.gu.scanamo.update.UpdateExpression
   * }}}
   */
 case class Table[V: DynamoFormat](name: String) {
+  import RequestModifier.nullModifier
 
   def put(v: V) = ScanamoFree.put(name)(v)
   def putAll(vs: Set[V]) = ScanamoFree.putAll(name)(vs)
-  def get(key: UniqueKey[_]) = ScanamoFree.get[V](name)(key)
+  def get(key: UniqueKey[_])(implicit requestModifier: GetItem.Modifier = nullModifier) = ScanamoFree.get[V](name)(key)
   def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](name)(keys)
   def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
 
