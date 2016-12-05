@@ -1,6 +1,5 @@
 package com.gu.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.GetItemRequest
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
@@ -424,21 +423,21 @@ private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName:
     */
   def limit(n: Int) = IndexLimit(this, n)
 
-  def scan() = Scannable.indexScannable[V].scan(this)
+  def scan()(implicit scanModifier: ScanItems.Modifier) = Scannable.indexScannable[V].scan(this)
   def query(query: Query[_]) = Queryable.indexQueryable[V].query(this)(query: Query[_])
 }
 
 private[scanamo] case class TableLimit[V: DynamoFormat](table: Table[V], limit: Int) {
-  def scan() = Scannable.limitedTableScannable[V].scan(this)
+  def scan()(implicit scanModifier: ScanItems.Modifier) = Scannable.limitedTableScannable[V].scan(this)
   def query(query: Query[_]) = Queryable.limitedTableQueryable[V].query(this)(query: Query[_])
 }
 private[scanamo] case class IndexLimit[V: DynamoFormat](index: Index[V], limit: Int) {
-  def scan() = Scannable.limitedIndexScannable[V].scan(this)
+  def scan()(implicit scanModifier: ScanItems.Modifier) = Scannable.limitedIndexScannable[V].scan(this)
   def query(query: Query[_]) = Queryable.limitedIndexQueryable[V].query(this)(query: Query[_])
 }
 
 /* typeclass */trait Scannable[T[_], V] {
-  def scan(t: T[V])(): ScanamoOps[List[Either[DynamoReadError, V]]]
+  def scan(t: T[V])()(implicit scanModifier: ScanItems.Modifier): ScanamoOps[List[Either[DynamoReadError, V]]]
 }
 
 object Scannable {
@@ -458,20 +457,20 @@ object Scannable {
   }
 
   implicit def tableScannable[V: DynamoFormat] = new Scannable[Table, V] {
-    override def scan(t: Table[V])(): ScanamoOps[List[Either[DynamoReadError, V]]] =
+    override def scan(t: Table[V])()(implicit scanModifier: ScanItems.Modifier): ScanamoOps[List[Either[DynamoReadError, V]]] =
       ScanamoFree.scan[V](t.name)
   }
   implicit def indexScannable[V: DynamoFormat] = new Scannable[Index, V] {
-    override def scan(i: Index[V])(): ScanamoOps[List[Either[DynamoReadError, V]]] =
+    override def scan(i: Index[V])()(implicit scanModifier: ScanItems.Modifier): ScanamoOps[List[Either[DynamoReadError, V]]] =
       ScanamoFree.scanIndex[V](i.tableName, i.indexName)
   }
 
   implicit def limitedTableScannable[V: DynamoFormat] = new Scannable[TableLimit, V] {
-    override def scan(t: TableLimit[V])(): ScanamoOps[List[Either[DynamoReadError, V]]] =
+    override def scan(t: TableLimit[V])()(implicit scanModifier: ScanItems.Modifier): ScanamoOps[List[Either[DynamoReadError, V]]] =
       ScanamoFree.scanWithLimit[V](t.table.name, t.limit)
   }
   implicit def limitedIndexScannable[V: DynamoFormat] = new Scannable[IndexLimit, V] {
-    override def scan(i: IndexLimit[V])(): ScanamoOps[List[Either[DynamoReadError, V]]] =
+    override def scan(i: IndexLimit[V])()(implicit scanModifier: ScanItems.Modifier): ScanamoOps[List[Either[DynamoReadError, V]]] =
       ScanamoFree.scanIndexWithLimit[V](i.index.tableName, i.index.indexName, i.limit)
   }
 }

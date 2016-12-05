@@ -1,6 +1,6 @@
 package com.gu.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.GetItemRequest
+import com.amazonaws.services.dynamodbv2.model.{GetItemRequest, ScanRequest}
 
 trait RequestModifier[T] {
   def apply(t: T): T
@@ -18,5 +18,12 @@ object GetItem {
   type Modifier = RequestModifier[GetItemRequest]
   object WithConsistentRead extends Modifier {
     override def apply(t: GetItemRequest): GetItemRequest = t.withConsistentRead(true)
+  }
+}
+
+object ScanItems {
+  type Modifier = RequestModifier[ScanRequest]
+  object WithConsistentRead extends Modifier {
+    override def apply(t: ScanRequest): ScanRequest = t.withConsistentRead(true)
   }
 }
