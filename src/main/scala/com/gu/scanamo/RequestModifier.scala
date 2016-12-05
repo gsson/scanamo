@@ -30,4 +30,8 @@ object ScanItems {
   case class WithLimit(limit: Int) extends Modifier {
     override def apply(t: ScanRequest): ScanRequest = t.withLimit(limit)
   }
+
+  case class WithIndexName(indexName: String) extends Modifier {
+    override def apply(t: ScanRequest): ScanRequest = t.withIndexName(indexName)
+  }
 }
