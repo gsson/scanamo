@@ -69,7 +69,7 @@ object ScanamoFree {
 
   def scanWithLimit[T: DynamoFormat](tableName: String, limit: Int)
     (implicit requestModifier: ScanItems.Modifier = nullModifier): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    ScanResultStream.stream[T](requestModifier(new ScanRequest().withTableName(tableName).withLimit(limit)))
+    scan(tableName)(implicitly[DynamoFormat[T]], ScanItems.WithLimit(limit).andThen(requestModifier))
 
   def scanIndex[T: DynamoFormat](tableName: String, indexName: String)
     (implicit requestModifier: ScanItems.Modifier = nullModifier): ScanamoOps[List[Either[DynamoReadError, T]]] =

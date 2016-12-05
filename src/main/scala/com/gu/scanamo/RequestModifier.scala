@@ -26,4 +26,8 @@ object ScanItems {
   object WithConsistentRead extends Modifier {
     override def apply(t: ScanRequest): ScanRequest = t.withConsistentRead(true)
   }
+
+  case class WithLimit(limit: Int) extends Modifier {
+    override def apply(t: ScanRequest): ScanRequest = t.withLimit(limit)
+  }
 }
